@@ -193,7 +193,7 @@ class ChatRenderer {
       const highlightWholeMessage = setting.highlightWholeMessage;
       const matchWord = setting.matchWord;
       const matchCase = setting.matchCase;
-      const allowedRegex = /^[a-zа-яё0-9_\-$/^[\s\]\\]+$/gi;
+
       const isRegex = text.charAt(0) === '/' && text.charAt(text.length - 1) === '/';
       const regexEscapeCharacters = /[!#$%^&*)(+=.<>{}[\]:;'"|~`_\-\\/]/g;
 
@@ -201,16 +201,8 @@ class ChatRenderer {
       const lines = isRegex ? [text] : text
         .split(/[,|]/)
         .map((str) => str.trim())
-        .filter(
-          (str) =>
-            // Must be longer than one character
-            str &&
-            str.length > 1 &&
-            // Must be alphanumeric (with some punctuation)
-            allowedRegex.test(str) &&
-            // Reset lastIndex so it does not mess up the next word
-            ((allowedRegex.lastIndex = 0) || true)
-        );
+        // Must be longer than one character
+        .filter((str) => str && str.length > 1);
       let highlightWords;
       let highlightRegex;
       // Nothing to match, reset highlighting
