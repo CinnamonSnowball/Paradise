@@ -188,14 +188,17 @@ class ChatRenderer {
     }
     highlightSettings.map((id) => {
       const setting = highlightSettingById[id];
-      const text = setting.highlightText;
+      const text = String(setting.highlightText);
       const highlightColor = setting.highlightColor;
       const highlightWholeMessage = setting.highlightWholeMessage;
       const matchWord = setting.matchWord;
       const matchCase = setting.matchCase;
       const allowedRegex = /^[a-zа-яё0-9_\-$/^[\s\]\\]+$/gi;
+      const isRegex = text.charAt(0) === '/' && text.charAt(text.length - 1) === '/';
       const regexEscapeCharacters = /[!#$%^&*)(+=.<>{}[\]:;'"|~`_\-\\/]/g;
-      const lines = String(text)
+
+      // Split and trim only non-regex highlights
+      const lines = isRegex ? [text] : text
         .split(/[,|]/)
         .map((str) => str.trim())
         .filter(
