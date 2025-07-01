@@ -195,7 +195,6 @@ class ChatRenderer {
       const matchCase = setting.matchCase;
 
       const isRegex = text.charAt(0) === '/' && text.charAt(text.length - 1) === '/';
-      const regexEscapeCharacters = /[!#$%^&*)(+=.<>{}[\]:;'"|~`_\-\\/]/g;
 
       // Split and trim only non-regex highlights
       const lines = isRegex ? [text] : text
@@ -225,9 +224,6 @@ class ChatRenderer {
           if (!highlightWords) {
             highlightWords = [];
           }
-          // We're not going to let regex characters fuck up our RegEx operation.
-          line = line.replace(regexEscapeCharacters, '\\$&');
-
           highlightWords.push(line);
         }
       }
