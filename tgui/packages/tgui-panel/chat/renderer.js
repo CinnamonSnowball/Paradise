@@ -193,56 +193,44 @@ class ChatRenderer {
       const highlightWholeMessage = setting.highlightWholeMessage;
       const matchWord = setting.matchWord;
       const matchCase = setting.matchCase;
+      // Regex expression syntax is '/[exp]/'
+      const isRegexHighlight = text.charAt(0) === '/' && text.charAt(text.length - 1) === '/';
 
-      const isRegex = text.charAt(0) === '/' && text.charAt(text.length - 1) === '/';
-
-      // Split and trim only non-regex highlights
-      const lines = isRegex ? [text] : text
-        .split(/[,|]/)
-        .map((str) => str.trim())
-        // Must be longer than one character
-        .filter((str) => str && str.length > 1);
-      let highlightWords;
       let highlightRegex;
-      // Nothing to match, reset highlighting
-      if (lines.length === 0) {
-        return;
-      }
-      let regexExpressions = [];
-      // Organize each highlight entry into regex expressions and words
-      for (let line of lines) {
-        // Regex expression syntax is /[exp]/
-        if (line.charAt(0) === '/' && line.charAt(line.length - 1) === '/') {
-          const expr = line.substring(1, line.length - 1);
-          // Check if this is more than one character
-          if (/^(\[.*\]|\\.|.)$/.test(expr)) {
-            continue;
-          }
-          regexExpressions.push(expr);
-        } else {
-          // Lazy init
-          if (!highlightWords) {
-            highlightWords = [];
-          }
-          highlightWords.push(line);
-        }
-      }
-      const regexStr = regexExpressions.join('|');
+      let highlightWords;
       const flags = 'g' + (matchCase ? '' : 'i');
       // We wrap this in a try-catch to ensure that broken regex doesn't break
       // the entire chat.
       try {
-        // setting regex overrides matchword
-        if (regexStr) {
-          highlightRegex = new RegExp('(' + regexStr + ')', flags);
-        } else {
+        if (!isRegexHighlight) {
+          highlightWords = text
+            .split(/[,|]/)
+            .map((str) => str.trim())
+            // Must be longer than one character
+            .filter((str) => str && str.length > 1);
+
+          if (highlightWords.length === 0) {
+            // Nothing to match, abort highlighting
+            return;
+          }
+
           const pattern = `${matchWord ? '\\b' : ''}(${highlightWords.join('|')})${matchWord ? '\\b' : ''}`;
           highlightRegex = new RegExp(pattern, flags);
+        } else {
+          const expr = text.substring(1, text.length - 1);
+
+          // Rudimentary filter for expressions that evaluate to a single character
+          if (/^(\[.*\]|\\.|.)$/.test(expr)) {
+            return;
+          }
+
+          highlightRegex = new RegExp(`(${expr})`, flags);
         }
       } catch {
         // We just reset it if it's invalid.
         highlightRegex = null;
       }
+
       // Lazy init
       if (!this.highlightParsers) {
         this.highlightParsers = [];
