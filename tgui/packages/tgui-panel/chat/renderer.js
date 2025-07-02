@@ -196,11 +196,11 @@ class ChatRenderer {
       // Regex expression syntax is '/[exp]/'
       const isRegexHighlight = text.charAt(0) === '/' && text.charAt(text.length - 1) === '/';
 
-      let highlightRegex;
       let highlightWords;
+      let highlightRegex;
       const flags = 'g' + (matchCase ? '' : 'i');
-      // We wrap this in a try-catch to ensure that broken regex doesn't break
-      // the entire chat.
+      // We wrap this in a try-catch to ensure that
+      // broken regex doesn't break the entire chat.
       try {
         if (!isRegexHighlight) {
           highlightWords = text
@@ -210,11 +210,11 @@ class ChatRenderer {
             .filter((str) => str && str.length > 1);
 
           if (highlightWords.length === 0) {
-            // Nothing to match, abort highlighting
             return;
           }
 
-          const pattern = `${matchWord ? '\\b' : ''}(${highlightWords.join('|')})${matchWord ? '\\b' : ''}`;
+          const wordBoundary = matchWord ? '\\b' : '';
+          const pattern = `${wordBoundary}(${highlightWords.join('|')})${wordBoundary}`;
           highlightRegex = new RegExp(pattern, flags);
         } else {
           const expr = text.substring(1, text.length - 1);
